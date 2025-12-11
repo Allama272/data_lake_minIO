@@ -85,20 +85,16 @@ def clean_traffic(df):
         df['visibility_m'] = df['visibility_m'].clip(100, 10000)
 
     if 'congestion_level' in df.columns:
-        # Standardize congestion levels to Low/Medium/High
         mapping = {
-            'Low': 'Low',
-            'Medium': 'Medium',
-            'High': 'High',
-            'Very High': 'High',      # Map invalid to valid
-            'Extreme': 'High',        # Map invalid to valid
-            'Low-Medium': 'Medium',   # Map invalid to valid
-            '': None                  # Empty string to None
+            'Low': 2,
+            'Moderate': 5,
+            'High': 7,
+            'Very High': 8,
+            'Extreme': 10
         }
         df['congestion_level'] = df['congestion_level'].map(mapping)
-        # Fill remaining NaNs with mode (most common value)
-        if df['congestion_level'].notna().any():
-            df['congestion_level'] = df['congestion_level'].fillna(df['congestion_level'].mode()[0])
+        df['congestion_level'] = df['congestion_level'].fillna(df['congestion_level'].median())
+        df['congestion_level'] = df['congestion_level'].clip(0, 10)
 
     cat_cols = df.select_dtypes(include='object').columns
     for col in cat_cols:
